@@ -1,0 +1,30 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'Nunito', sans-serif;
+    background: #f9f9f9;
+    color: #1a1a1a;
+}
+
+.navbar{
+    padding: 16px 40px;
+    background : #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.logo{
+    font-size: 22px;
+    font-weight: 700;
+    color: #3C3489;
+}
+
+.hero{
+    text-align: center;
+    padding: 80px 20px 60px;
+    background: #fff;
+}
+
