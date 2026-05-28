@@ -327,3 +327,130 @@ body{
 .sharebox button:hover {
   background: #534AB7;
 }
+
+.photogrid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.photo-item img{
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px; 
+    border: 1px solid #eee;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.input-wrapper input {
+  margin-bottom: 0;
+  padding-right: 40px;
+}
+
+.input-wrapper span {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 16px;
+  color: #888;
+  user-select: none;
+}
+
+.copy-toast {
+  font-size: 13px;
+  color: #0F6E56;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+
+/* css for guest page */
+
+.guest-container {
+  min-height: calc(100vh - 57px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.guest-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+}
+
+.guest-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.guest-card p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#scan-btn {
+  width: 100%;
+  padding: 12px;
+  background: #3C3489;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  margin-bottom: 12px;
+}
+
+#scan-btn:hover {
+  background: #534AB7;
+}
+
+.scan-status {
+  font-size: 13px;
+  color: #888;
+  min-height: 20px;
+}
+
