@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoLelo-Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- lock screen ka format ...first step yahi se hoga -->
+    <div id="lockscreen" class="lockscreen">
+        <div class="lockcard">
+            <h2>Photographer Login</h2>
+            <p>Enter you access code to manage your photos</p>
+            <input type="password" id="passcode" placeholder="Access Code">
+            <p id="lockerror" class="error-msg">Incorrect code! Try again.</p>
+            <button onclick="checkpassword()">Unlock</button>
+        </div>
+    </div>
+
+    <!-- admin panel...tabhi khulega jab access code ke through unlock ho jaega -->
+    <div id="adminpanel" class="hidden">
+        <nav class="navbar">
+            <span class="logo">PhotoLelo</span>
+            <span class="nav-badge">Admin</span>
+            <button onclick="logout()">Logout</button>
+        </nav>
+
+        <div class="admin-content">
+
+            <!-- the section jisme poora data UPLOAD hoga -->
+            <div class="card">
+                <h2>Upload Photos</h2>
+                <p>Upload all your pictures here. Each face will be indexed automatically</p>
+                <div class="dropzone" id="dropzone">
+                    <p>Drag & Drop photos here</p>
+                    <p>Or <span onclick="document.getElementById('file-input').click()">browse files</span></p>
+                    <input type="file" id="file-input" accept="image/*" multiple>
+                </div>
+            </div>
+
+            <!-- jo bhi upload kiya uska section -->
+            <div class="card">
+                <h2>Uploaded photos</h2>
+                <div id="photogrid" class="photogrid">
+                    <p id="empty msg">No photos uploaded yet.</p>
+                </div>
+            </div>
+
+            <!-- final share button ka section -->
+            <div class="card">
+                <h2>Guest Link</h2>
+                <p>Share this link with your loved ones so they can find their photos.</p>
+                <div class="sharebox">
+                    <input type="text" id="sharelink" readonly value="photolelo.app/event/SNAP-001">
+                    <button onclick="copylink()">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/admin.js"></script>
+</body>
+</html>
