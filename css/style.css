@@ -28,3 +28,105 @@ body{
     background: #fff;
 }
 
+.hero h1{
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+}
+
+.hero h1 em{
+    font-style: italic;
+    color: #3C3489;
+}
+
+.hero p{
+    font-size: 18px;
+    color: #555;
+    max-width: 500px;
+    margin: 0 auto 32px;
+    line-height: 1.6;
+}
+
+.main-buttons{
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn{
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.btn:hover{
+    opacity: 0.85;
+}
+
+.btn-primary{
+    background: #3C3489;
+    color: #fff;
+}
+
+.btn-secondary{
+    background: #fff;
+    color: #3C3489;
+    border: 1.5px solid #3C3489;
+}
+
+/* working section ka format */
+.working{
+    padding: 60px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.working h2{
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.steps{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.step{
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.step-num{
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #3C3489;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.step h3{
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.step p{
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
