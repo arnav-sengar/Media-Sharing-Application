@@ -1,3 +1,32 @@
+const CLOUDINARY_CLOUD_NAME = 'deg0hgtgb';
+const CLOUDINARY_UPLOAD_PRESET = 'ue45bpd3';
+
+const ADMIN_MODEL_URL = './models';
+
+async function uploadToCloudinary(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    { method: 'POST', body: formData }
+  );
+
+  const data = await response.json();
+  console.log('Cloudinary upload:', data.secure_url);
+  return data.secure_url;
+}
+
+async function loadAdminModels() {
+  await faceapi.nets.tinyFaceDetector.loadFromUri(ADMIN_MODEL_URL);
+  await faceapi.nets.faceLandmark68Net.loadFromUri(ADMIN_MODEL_URL);
+  await faceapi.nets.faceRecognitionNet.loadFromUri(ADMIN_MODEL_URL);
+  console.log('Admin models loaded');
+}
+
+loadAdminModels();
+
 function checkpassword(){
     const input = document.getElementById("passcode").value;
     const error = document.getElementById("lockerror");
@@ -44,27 +73,48 @@ dropzone.addEventListener("drop",function(e){
 
 // function to handle the uploaded files
 
-function handleFiles(files){
-    Array.from(files).forEach(function(file){
-        if(!file.type.startsWith("image/")) return;
+function handleFiles(files) {
+  Array.from(files).forEach(async function(file) {
+    if (!file.type.startsWith('image/')) return;
 
-        const reader = new FileReader();
-        reader.onload = function(e){
-            addPhototoGrid(e.target.result,file.name);
-        };
-        reader.readAsDataURL(file);
-    });
+    // upload to cloudinary first
+    const cloudinaryUrl = await uploadToCloudinary(file);
+
+    // then read locally for display and face detection
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      addPhototoGrid(cloudinaryUrl, e.target.result, file.name);
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 // jo bhi pictures upload ki h...unko properly grid mein show karna
 
-function addPhototoGrid(src,name){
-    if(emptymessage) emptymessage.remove();
+async function addPhototoGrid(cloudinaryUrl, localSrc, name) {
+  if (emptymessage) emptymessage.remove();
 
-    const div = document.createElement("div");
-    div.className = "photo-item";
-    div.innerHTML = `<img src = "${src}" alt = "${name}">`;
-    photoGrid.appendChild(div);
+  const div = document.createElement('div');
+  div.className = 'photoitem';
+  div.innerHTML = `<img src="${localSrc}" alt="${name}" />`;
+  photoGrid.appendChild(div);
+
+  // detect faces using local src
+  const img = await faceapi.fetchImage(localSrc);
+  const detections = await faceapi
+    .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+    .withFaceLandmarks()
+    .withFaceDescriptors();
+
+  console.log(`${name}: ${detections.length} face(s) detected`);
+
+  const descriptors = detections.map(d => Array.from(d.descriptor));
+
+  // save cloudinary url + descriptors to localStorage
+  const stored = localStorage.getItem('photolelo_photos');
+  const photos = stored ? JSON.parse(stored) : [];
+  photos.push({ src: cloudinaryUrl, name: name, descriptors: descriptors });
+  localStorage.setItem('photolelo_photos', JSON.stringify(photos));
 }
 
 // generating a copy link

@@ -454,3 +454,42 @@ video {
   min-height: 20px;
 }
 
+
+/* === RESULTS GRID === */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.result-item {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  background: #fff;
+}
+
+.result-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+.download-btn {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  background: #3C3489;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: 'Nunito', sans-serif;
+  transition: background 0.2s;
+}
+
+.download-btn:hover {
+  background: #534AB7;
+}
