@@ -37,6 +37,18 @@
       <div class="admin-content">
         <!-- the section jisme poora data UPLOAD hoga -->
         <div class="card">
+          <h2>Create Event</h2>
+
+          <input type="text" id="eventname" placeholder="Event Name" />
+
+          <button onclick="createPhotoEvent()">Create Event</button>
+
+          <p id="eventid">No event created</p>
+          <p><strong>Guest Link:</strong></p>
+
+          <input type="text" id="sharelink" readonly />
+        </div>
+        <div class="card">
           <h2>Upload Photos</h2>
           <p>
             Upload all your pictures here. Each face will be indexed
@@ -82,6 +94,6 @@
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script src="js/admin.js"></script>
+    <script type="module" src="js/admin.js"></script>
   </body>
 </html>

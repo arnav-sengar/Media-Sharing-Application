@@ -1,3 +1,8 @@
+import { db, ref, get } from "./firebase-guest.js";
+const params = new URLSearchParams(window.location.search);
+const EVENT_ID = params.get("event");
+
+console.log("Current Event:", EVENT_ID);
 //where to find AI models files
 const MODEL_URL = "./models";
 
@@ -27,7 +32,7 @@ async function startCamera() {
   }
 }
 
-async function startScan() {
+window.startScan = async function () {
   scanStatus.textContent = "Scanning your face...";
   scanBtn.disabled = true; // jab already scan ho rha hota h toh 50 baar click nhi karne  deta...just a good practice
 
@@ -64,38 +69,59 @@ async function startScan() {
 
   scanStatus.textContent = "Face found! Searching your photos...";
   const userDescriptor = detection.descriptor; // woh 128 number fingerprint ko ek variable mein store kar rhe
-  matchPhotos(userDescriptor); // now we pass that scanned fingerprint to matchPhotos to compare with all stored photos
+  await matchPhotos(userDescriptor);// now we pass that scanned fingerprint to matchPhotos to compare with all stored photos
 }
 
-function matchPhotos(userDescriptor) {
-  const stored = localStorage.getItem("photolelo_photos"); // retrieves the photo the uploaded by the photographer
-  if (!stored) {
-    scanStatus.textContent = "No photos found in this event.";
+async function matchPhotos(userDescriptor) {
+
+  if (!EVENT_ID) {
+    scanStatus.textContent =
+      "Invalid event link.";
     scanBtn.disabled = false;
-    return; // agar koi photo nhi stored h us link par...toh just message deke  return kar de rha
+    return;
   }
 
-  const photos = JSON.parse(stored); // photos jo string ke form mein h in 'stored' usko ek array mein convert kardiya named 'photos'
-  const matches = []; // to store the matched photos
+  const snapshot = await get(
+    ref(
+      db,
+      `events/${EVENT_ID}/photos`
+    )
+  );
 
-  // now this part might confuse you...
-  // lemme try easily samjhane ka
-  // dekhoo....ho sakta h ek photo mein kayi saare log ho...toh us photo mein har insaan ke face ke liye ek descriptor banega
-  // isliye we have done -
-  // storage se saari photos nikali -> har photo mein jitne bhi descriptor h sabse guest ke descriptor ko match kiya -> if matches toh use push kar diya matches wale array mein
-  // get it??
+  if (!snapshot.exists()) {
+    scanStatus.textContent =
+      "No photos found for this event.";
+    scanBtn.disabled = false;
+    return;
+  }
+
+  const photosObj = snapshot.val();
+
+  const photos = Object.values(photosObj);
+
+  const matches = [];
+
   photos.forEach(function (photo) {
+
     if (!photo.descriptors) return;
+
     photo.descriptors.forEach(function (descriptor) {
-      const dist = faceapi.euclideanDistance(userDescriptor, descriptor); // dono face descriptors ko compare karta h and ek value return karta h
+
+      const dist =
+        faceapi.euclideanDistance(
+          userDescriptor,
+          descriptor
+        );
+
       if (dist < 0.5) {
-        // if woh value 0.5 se kam hui...then we can say ki maybe same person ho
         matches.push(photo.src);
       }
+
     });
+
   });
 
-  showResults(matches); // pass that array to showResults function
+  showResults(matches);
 }
 
 async function downloadPhoto(url) {
@@ -143,7 +169,7 @@ function showResults(matches) {
 }
 
 // reset everything to initial
-function rescan() {
+window.rescan = function () {
   document.getElementById("results-screen").style.display = "none";
   document.getElementById("scan-screen").style.display = "block";
   scanBtn.disabled = false;
