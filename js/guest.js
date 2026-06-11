@@ -3,6 +3,7 @@ const params = new URLSearchParams(window.location.search);
 const EVENT_ID = params.get("event");
 
 console.log("Current Event:", EVENT_ID);
+
 //where to find AI models files
 const MODEL_URL = "./models";
 
@@ -69,58 +70,58 @@ window.startScan = async function () {
 
   scanStatus.textContent = "Face found! Searching your photos...";
   const userDescriptor = detection.descriptor; // woh 128 number fingerprint ko ek variable mein store kar rhe
-  await matchPhotos(userDescriptor);// now we pass that scanned fingerprint to matchPhotos to compare with all stored photos
-}
+  await matchPhotos(userDescriptor); // now we pass that scanned fingerprint to matchPhotos to compare with all stored photos
+};
 
 async function matchPhotos(userDescriptor) {
-
   if (!EVENT_ID) {
-    scanStatus.textContent =
-      "Invalid event link.";
+    scanStatus.textContent = "Invalid event link.";
     scanBtn.disabled = false;
     return;
   }
 
-  const snapshot = await get(
-    ref(
-      db,
-      `events/${EVENT_ID}/photos`
-    )
-  );
+  const snapshot = await get(ref(db, `events/${EVENT_ID}/photos`));
 
   if (!snapshot.exists()) {
-    scanStatus.textContent =
-      "No photos found for this event.";
+    scanStatus.textContent = "No photos found for this event.";
     scanBtn.disabled = false;
     return;
   }
 
   const photosObj = snapshot.val();
-
   const photos = Object.values(photosObj);
+
+  // debug logs
+  console.log("Photos from Firebase:", photos.length);
+  console.log("First photo descriptors:", photos[0]?.descriptors);
 
   const matches = [];
 
+  // now this part might confuse you...
+  // lemme try easily samjhane ka
+  // dekhoo....ho sakta h ek photo mein kayi saare log ho...toh us photo mein har insaan ke face ke liye ek descriptor banega
+  // isliye we have done -
+  // storage se saari photos nikali -> har photo mein jitne bhi descriptor h sabse guest ke descriptor ko match kiya -> if matches toh use push kar diya matches wale array mein
+  // get it??
   photos.forEach(function (photo) {
-
     if (!photo.descriptors) return;
-
+    console.log("descriptor type:", typeof photo.descriptors[0]);
+    console.log("descriptor sample:", photo.descriptors[0]);
+    let matched = false;
     photo.descriptors.forEach(function (descriptor) {
-
-      const dist =
-        faceapi.euclideanDistance(
-          userDescriptor,
-          descriptor
-        );
-
+      if (matched) return;
+      const float32 = new Float32Array(
+        Array.isArray(descriptor) ? descriptor : Object.values(descriptor),
+      );
+      const dist = faceapi.euclideanDistance(userDescriptor, float32);
       if (dist < 0.5) {
-        matches.push(photo.src);
+        matched = true;
       }
-
     });
 
+    if (matched) matches.push(photo.src);
   });
-
+  console.log("Total matches found:", matches.length);
   showResults(matches);
 }
 
@@ -138,8 +139,13 @@ async function downloadPhoto(url) {
 }
 
 function showResults(matches) {
+  console.log("showResults called, matches:", matches.length);
+  console.log("matches:", matches);
+
   document.getElementById("scan-screen").style.display = "none";
-  document.getElementById("results-screen").style.display = "block";
+  const resultsScreen = document.getElementById("results-screen");
+  resultsScreen.classList.remove("hidden");
+  resultsScreen.style.display = "block";
 
   const grid = document.getElementById("results-grid");
   const count = document.getElementById("results-count");
@@ -151,21 +157,21 @@ function showResults(matches) {
 
   count.textContent = matches.length + " photo(s) found with you in them!";
 
-    matches.forEach(function (src) {
-      const div = document.createElement("div");
-      div.className = "result-item";
-      div.innerHTML = `<img src="${src}" />`;
+  matches.forEach(function (src) {
+    const div = document.createElement("div");
+    div.className = "result-item";
+    div.innerHTML = `<img src="${src}" />`;
 
-      const btn = document.createElement("button");
-      btn.textContent = "Download";
-      btn.className = "download-btn";
-      btn.onclick = function () {
-        downloadPhoto(src);
-      };
+    const btn = document.createElement("button");
+    btn.textContent = "Download";
+    btn.className = "download-btn";
+    btn.onclick = function () {
+      downloadPhoto(src);
+    };
 
-      div.appendChild(btn);
-      grid.appendChild(div);
-    });
+    div.appendChild(btn);
+    grid.appendChild(div);
+  });
 }
 
 // reset everything to initial
@@ -174,8 +180,43 @@ window.rescan = function () {
   document.getElementById("scan-screen").style.display = "block";
   scanBtn.disabled = false;
   scanStatus.textContent = "Camera ready. Click Scan my face.";
-}
+  
+  // clear previous results
+  document.getElementById("results-grid").innerHTML = "";
+  document.getElementById("results-count").textContent = "Looking through the event photos...";
+};
 
-// this starts everything
-// as soon as the guest lands on the scan page...models start loading so that user ko wait na krna pade when they click scan
-loadModels();
+window.submitEventLink = function () {
+  const input = document.getElementById("event-link-input").value.trim();
+
+  if (!input) {
+    document.getElementById("link-error").style.display = "block";
+    return;
+  }
+
+  try {
+    const url = new URL(input);
+    const eventId = url.searchParams.get("event");
+
+    if (!eventId) {
+      document.getElementById("link-error").style.display = "block";
+      return;
+    }
+
+    // redirect to guest page with event ID
+    window.location.href = "guest.html?event=" + eventId;
+  } catch (err) {
+    document.getElementById("link-error").style.display = "block";
+  }
+};
+
+// agar event ID nhi h URL mein toh link screen dikhao
+// warna seedha camera start karo
+if (!EVENT_ID) {
+  document.getElementById("link-screen").style.display = "flex";
+  document.getElementById("scan-screen").style.display = "none";
+} else {
+  document.getElementById("link-screen").style.display = "none";
+  document.getElementById("scan-screen").style.display = "flex";
+  loadModels();
+}

@@ -1,4 +1,4 @@
-import { db, ref, set, push } from "./firebase.js";
+import { db, ref, set, push, get, remove } from "./firebase.js";
 const CLOUDINARY_CLOUD_NAME = "deg0hgtgb";
 const CLOUDINARY_UPLOAD_PRESET = "ue45bpd3";
 
@@ -27,9 +27,11 @@ window.createPhotoEvent = async function () {
 
   currentEventId = eventId;
 
-  document.getElementById("eventid").textContent = "Created: " + eventId;
+  document.getElementById("eventid").textContent = "Event ID: " + eventId;
 
-  alert("Event created!");
+  const guestLink =
+    window.location.origin + "/PhotoLelo/guest.html?event=" + eventId;
+  document.getElementById("sharelink").value = guestLink;
 };
 
 async function uploadToCloudinary(file) {
@@ -63,6 +65,7 @@ window.checkpassword = function () {
   if (input == "photo123") {
     document.getElementById("lockscreen").style.display = "none";
     document.getElementById("adminpanel").style.display = "block";
+    loadEvents();
   } else {
     error.style.display = "block";
   }
@@ -181,3 +184,99 @@ window.togglePassword = function () {
     input.type = "password";
   }
 };
+
+async function loadEvents() {
+  const snapshot = await get(ref(db, "events"));
+
+  if (!snapshot.exists()) return;
+
+  const eventsList = document.getElementById("events-list");
+  const eventsEmpty = document.getElementById("events-empty");
+
+  if (eventsEmpty) eventsEmpty.remove();
+
+  eventsList.innerHTML = "";
+
+  const eventsObj = snapshot.val();
+  const events = Object.entries(eventsObj);
+
+  events.forEach(function ([eventId, eventData]) {
+    const date = new Date(eventData.createdAt).toLocaleDateString();
+    const guestLink =
+      window.location.origin + "/PhotoLelo/guest.html?event=" + eventId;
+
+    const div = document.createElement("div");
+    div.className = "event-item";
+    div.id = "event-" + eventId;
+    div.innerHTML = `
+      <div>
+        <div class="event-item-name">${eventData.eventName}</div>
+        <div class="event-item-meta">${eventId} · ${date}</div>
+      </div>
+      <div class="event-item-right">
+  <button class="event-select-btn" onclick="selectEvent('${eventId}', '${eventData.eventName}', '${guestLink}')">Select</button>
+  <button class="event-delete-btn" onclick="deleteEvent('${eventId}')">Delete</button>
+</div>
+    `;
+    eventsList.appendChild(div);
+  });
+}
+window.selectEvent = function(eventId, eventName, guestLink) {
+  currentEventId = eventId;
+  
+  document.getElementById("sharelink").value = guestLink;
+  document.getElementById("eventid").textContent = 'Active: ' + eventName + ' (' + eventId + ')';
+
+  document.querySelectorAll('.event-item').forEach(function(item) {
+    item.classList.remove('active');
+  });
+  document.getElementById('event-' + eventId).classList.add('active');
+
+  console.log('Selected event:', eventId);
+
+  // load photos for this event
+  loadEventPhotos(eventId);
+}
+
+
+window.deleteEvent = async function(eventId) {
+  const confirm = window.confirm('Delete this event? This cannot be undone.');
+  if (!confirm) return;
+
+  await remove(ref(db, 'events/' + eventId));
+  
+  // remove from UI
+  const item = document.getElementById('event-' + eventId);
+  if (item) item.remove();
+
+  // if deleted event was the active one, reset
+  if (currentEventId === eventId) {
+    currentEventId = null;
+    document.getElementById('sharelink').value = '';
+    document.getElementById('eventid').textContent = 'No event created';
+  }
+
+  console.log('Event deleted:', eventId);
+}
+
+async function loadEventPhotos(eventId) {
+  const photoGrid = document.getElementById('photogrid');
+  photoGrid.innerHTML = '<p>Loading photos...</p>';
+
+  const snapshot = await get(ref(db, 'events/' + eventId + '/photos'));
+
+  if (!snapshot.exists()) {
+    photoGrid.innerHTML = '<p id="emptymsg">No photos uploaded yet.</p>';
+    return;
+  }
+
+  photoGrid.innerHTML = '';
+
+  const photosObj = snapshot.val();
+  Object.values(photosObj).forEach(function(photo) {
+    const div = document.createElement('div');
+    div.className = 'photoitem';
+    div.innerHTML = `<img src="${photo.src}" alt="${photo.name}" />`;
+    photoGrid.appendChild(div);
+  });
+}

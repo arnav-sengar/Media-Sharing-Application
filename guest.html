@@ -13,8 +13,19 @@
     <span class="logo">PhotoLelo</span>
   </nav>
 
+  <!-- EVENT LINK SCREEN -->
+  <div id="link-screen" class="guest-container hidden">
+    <div class="guest-card">
+      <h2>Enter event link</h2>
+      <p>Ask your photographer for the event link or paste it below.</p>
+      <input type="text" id="event-link-input" placeholder="Paste your event link here" />
+      <button id="link-btn" onclick="submitEventLink()">Continue</button>
+      <p id="link-error" class="error-msg">Invalid link. Please check and try again.</p>
+    </div>
+  </div>
+
   <!-- SCAN SCREEN -->
-  <div id="scan-screen" class="guest-container">
+  <div id="scan-screen" class="guest-container hidden">
     <div class="guest-card">
       <h2>Find your photos</h2>
       <p>Allow camera access and click scan. We'll find every photo you're in.</p>
@@ -29,16 +40,18 @@
     </div>
   </div>
 
-  <!-- RESULTS SCREEN (hidden until scan is done) -->
+  <!-- RESULTS SCREEN -->
   <div id="results-screen" class="hidden">
-    <nav class="navbar">
-      <span class="logo">PhotoLelo</span>
-      <button onclick="rescan()">Scan again</button>
-    </nav>
-    <div class="admin-content">
-      <div class="card">
-        <h2>Your Photos</h2>
-        <p id="results-count">Looking through the event photos...</p>
+    <div class="admin-content" style="margin-top: 60px;"> <div class="card">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+          <div>
+            <h2>Your Photos</h2>
+            <p id="results-count" style="margin-bottom: 0;">Looking through the event photos...</p>
+          </div>
+          <button onclick="rescan()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">Scan again</button>
+        </div>
+        
         <div id="results-grid" class="results-grid"></div>
       </div>
     </div>
