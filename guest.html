@@ -1,63 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PhotoLelo — Find My Photos</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhotoLelo — Find My Photos</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="index.html" class="logo" style="text-decoration: none"
+        >PhotoLelo</a
+      >
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        🌙
+      </button>
+    </nav>
 
-  <nav class="navbar">
-    <span class="logo">PhotoLelo</span>
-  </nav>
-
-  <!-- EVENT LINK SCREEN -->
-  <div id="link-screen" class="guest-container hidden">
-    <div class="guest-card">
-      <h2>Enter event link</h2>
-      <p>Ask your photographer for the event link or paste it below.</p>
-      <input type="text" id="event-link-input" placeholder="Paste your event link here" />
-      <button id="link-btn" onclick="submitEventLink()">Continue</button>
-      <p id="link-error" class="error-msg">Invalid link. Please check and try again.</p>
-    </div>
-  </div>
-
-  <!-- SCAN SCREEN -->
-  <div id="scan-screen" class="guest-container hidden">
-    <div class="guest-card">
-      <h2>Find your photos</h2>
-      <p>Allow camera access and click scan. We'll find every photo you're in.</p>
-
-      <div class="video-wrapper">
-        <video id="video" autoplay muted playsinline></video>
-        <canvas id="overlay" class="overlay"></canvas>
-      </div>
-
-      <button id="scan-btn" onclick="startScan()">Scan my face</button>
-      <p id="scan-status" class="scan-status"></p>
-    </div>
-  </div>
-
-  <!-- RESULTS SCREEN -->
-  <div id="results-screen" class="hidden">
-    <div class="admin-content" style="margin-top: 60px;"> <div class="card">
+    <!-- EVENT LINK SCREEN -->
+    <div id="link-screen" class="guest-container hidden">
+      <div class="guest-card">
         
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-          <div>
-            <h2>Your Photos</h2>
-            <p id="results-count" style="margin-bottom: 0;">Looking through the event photos...</p>
-          </div>
-          <button onclick="rescan()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">Scan again</button>
+        <h2>Enter event link</h2>
+        <p>Ask your photographer for the event link or paste it below.</p>
+        <input
+          type="text"
+          id="event-link-input"
+          placeholder="Paste your event link here"
+        />
+        <button id="link-btn" onclick="submitEventLink()">Continue</button>
+        <p id="link-error" class="error-msg">
+          Invalid link. Please check and try again.
+        </p>
+      </div>
+    </div>
+
+    <!-- SCAN SCREEN -->
+    <div id="scan-screen" class="guest-container hidden">
+      <div class="guest-card">
+        <h2>Find your photos</h2>
+        <p>
+          Allow camera access and click scan. We'll find every photo you're in.
+        </p>
+
+        <div class="video-wrapper">
+          <video id="video" autoplay muted playsinline></video>
+          <canvas id="overlay" class="overlay"></canvas>
         </div>
-        
-        <div id="results-grid" class="results-grid"></div>
+
+        <button id="scan-btn" onclick="startScan()">Scan my face</button>
+        <p id="scan-status" class="scan-status"></p>
       </div>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-  <script type="module" src="js/guest.js"></script>
-</body>
+    <!-- RESULTS SCREEN -->
+    <div id="results-screen" class="hidden">
+      <div class="admin-content" style="margin-top: 60px">
+        <div class="card">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 16px;
+            "
+          >
+            <div>
+              <h2>Your Photos</h2>
+              <p id="results-count" style="margin-bottom: 0">
+                Looking through the event photos...
+              </p>
+            </div>
+            <button
+              onclick="rescan()"
+              class="btn btn-secondary"
+              style="padding: 8px 16px; font-size: 13px"
+            >
+              Scan again
+            </button>
+          </div>
+
+          <div id="results-grid" class="results-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script type="module" src="js/guest.js"></script>
+    <script src="js/theme.js"></script>
+  </body>
 </html>

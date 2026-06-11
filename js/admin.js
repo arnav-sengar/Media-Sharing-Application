@@ -1,7 +1,14 @@
 import { db, ref, set, push, get, remove } from "./firebase.js";
+import {
+  auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "./firebase-auth.js";
+
 const CLOUDINARY_CLOUD_NAME = "deg0hgtgb";
 const CLOUDINARY_UPLOAD_PRESET = "ue45bpd3";
-
 const ADMIN_MODEL_URL = "./models";
 
 let currentEventId = null;
@@ -10,11 +17,85 @@ function generateEventId() {
   return "EVT-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+// === AUTH FUNCTIONS ===
+window.switchTab = function (tab) {
+  const loginForm = document.getElementById("login-form");
+  const signupForm = document.getElementById("signup-form");
+  const tabs = document.querySelectorAll(".auth-tab");
+
+  if (tab === "login") {
+    loginForm.classList.remove("hidden");
+    signupForm.classList.add("hidden");
+    tabs[0].classList.add("active");
+    tabs[1].classList.remove("active");
+  } else {
+    signupForm.classList.remove("hidden");
+    loginForm.classList.add("hidden");
+    tabs[1].classList.add("active");
+    tabs[0].classList.remove("active");
+  }
+};
+
+window.loginPhotographer = async function () {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+  const error = document.getElementById("login-error");
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    document.getElementById("lockscreen").style.display = "none";
+    document.getElementById("adminpanel").style.display = "block";
+    loadEvents();
+  } catch (err) {
+    error.style.display = "block";
+    error.textContent = err.message;
+  }
+};
+
+window.signupPhotographer = async function () {
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
+  const error = document.getElementById("signup-error");
+
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    document.getElementById("lockscreen").style.display = "none";
+    document.getElementById("adminpanel").style.display = "block";
+    loadEvents();
+  } catch (err) {
+    error.style.display = "block";
+    error.textContent = err.message;
+  }
+};
+
+window.logout = async function () {
+  await signOut(auth);
+  document.getElementById("adminpanel").style.display = "none";
+  document.getElementById("lockscreen").style.display = "flex";
+};
+
+window.togglePassword = function (inputId) {
+  const input = document.getElementById(inputId);
+  if (input.type === "password") {
+    input.type = "text";
+  } else {
+    input.type = "password";
+  }
+};
+
+// === EVENT FUNCTIONS ===
 window.createPhotoEvent = async function () {
   const name = document.getElementById("eventname").value;
 
   if (!name) {
-    alert("Enter event name");
+    document.getElementById("eventname-error").style.display = "block";
+    return;
+  }
+  document.getElementById("eventname-error").style.display = "none";
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert("You must be logged in.");
     return;
   }
 
@@ -23,17 +104,20 @@ window.createPhotoEvent = async function () {
   await set(ref(db, "events/" + eventId), {
     eventName: name,
     createdAt: Date.now(),
+    uid: user.uid,
   });
 
   currentEventId = eventId;
-
   document.getElementById("eventid").textContent = "Event ID: " + eventId;
 
   const guestLink =
     window.location.origin + "/PhotoLelo/guest.html?event=" + eventId;
   document.getElementById("sharelink").value = guestLink;
+
+  loadEvents();
 };
 
+// === CLOUDINARY ===
 async function uploadToCloudinary(file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -49,6 +133,7 @@ async function uploadToCloudinary(file) {
   return data.secure_url;
 }
 
+// === FACE API MODELS ===
 async function loadAdminModels() {
   await faceapi.nets.tinyFaceDetector.loadFromUri(ADMIN_MODEL_URL);
   await faceapi.nets.faceLandmark68Net.loadFromUri(ADMIN_MODEL_URL);
@@ -58,26 +143,7 @@ async function loadAdminModels() {
 
 loadAdminModels();
 
-window.checkpassword = function () {
-  const input = document.getElementById("passcode").value;
-  const error = document.getElementById("lockerror");
-
-  if (input == "photo123") {
-    document.getElementById("lockscreen").style.display = "none";
-    document.getElementById("adminpanel").style.display = "block";
-    loadEvents();
-  } else {
-    error.style.display = "block";
-  }
-};
-
-window.logout = function () {
-  document.getElementById("adminpanel").style.display = "none";
-  document.getElementById("lockscreen").style.display = "flex";
-  document.getElementById("passcode").value = "";
-  document.getElementById("lockerror").style.display = "none";
-};
-
+// === FILE UPLOAD ===
 const fileInput = document.getElementById("fileinput");
 const dropzone = document.getElementById("dropzone");
 const photoGrid = document.getElementById("photogrid");
@@ -102,16 +168,12 @@ dropzone.addEventListener("drop", function (e) {
   handleFiles(e.dataTransfer.files);
 });
 
-// function to handle the uploaded files
-
 function handleFiles(files) {
   Array.from(files).forEach(async function (file) {
     if (!file.type.startsWith("image/")) return;
 
-    // upload to cloudinary first
     const cloudinaryUrl = await uploadToCloudinary(file);
 
-    // then read locally for display and face detection
     const reader = new FileReader();
     reader.onload = function (e) {
       addPhototoGrid(cloudinaryUrl, e.target.result, file.name);
@@ -119,8 +181,6 @@ function handleFiles(files) {
     reader.readAsDataURL(file);
   });
 }
-
-// jo bhi pictures upload ki h...unko properly grid mein show karna
 
 async function addPhototoGrid(cloudinaryUrl, localSrc, name) {
   if (emptymessage) emptymessage.remove();
@@ -130,7 +190,6 @@ async function addPhototoGrid(cloudinaryUrl, localSrc, name) {
   div.innerHTML = `<img src="${localSrc}" alt="${name}" />`;
   photoGrid.appendChild(div);
 
-  // detect faces using local src
   const img = await faceapi.fetchImage(localSrc);
   const detections = await faceapi
     .detectAllFaces(
@@ -147,7 +206,6 @@ async function addPhototoGrid(cloudinaryUrl, localSrc, name) {
 
   const descriptors = detections.map((d) => Array.from(d.descriptor));
 
-  // save cloudinary url + descriptors to localStorage
   if (!currentEventId) {
     alert("Create an event first!");
     return;
@@ -162,8 +220,7 @@ async function addPhototoGrid(cloudinaryUrl, localSrc, name) {
   console.log("Photo saved to Firebase");
 }
 
-// generating a copy link
-
+// === COPY LINK ===
 window.copylink = function () {
   const link = document.getElementById("sharelink").value;
   navigator.clipboard.writeText(link);
@@ -176,31 +233,34 @@ window.copylink = function () {
   }, 2000);
 };
 
-window.togglePassword = function () {
-  const input = document.getElementById("passcode");
-  if (input.type === "password") {
-    input.type = "text";
-  } else {
-    input.type = "password";
-  }
-};
-
+// === EVENTS LIST ===
 async function loadEvents() {
-  const snapshot = await get(ref(db, "events"));
+  const user = auth.currentUser;
+  if (!user) return;
 
+  const snapshot = await get(ref(db, "events"));
   if (!snapshot.exists()) return;
 
   const eventsList = document.getElementById("events-list");
   const eventsEmpty = document.getElementById("events-empty");
 
   if (eventsEmpty) eventsEmpty.remove();
-
   eventsList.innerHTML = "";
 
   const eventsObj = snapshot.val();
-  const events = Object.entries(eventsObj);
+  const events = Object.entries(eventsObj).sort(
+    (a, b) => b[1].createdAt - a[1].createdAt,
+  );
+  // only show events belonging to this photographer
+  const myEvents = events.filter(([id, data]) => data.uid === user.uid);
 
-  events.forEach(function ([eventId, eventData]) {
+  if (myEvents.length === 0) {
+    eventsList.innerHTML =
+      '<p style="font-size:13px; color:#aaa;">No events yet.</p>';
+    return;
+  }
+
+  myEvents.forEach(function ([eventId, eventData]) {
     const date = new Date(eventData.createdAt).toLocaleDateString();
     const guestLink =
       window.location.origin + "/PhotoLelo/guest.html?event=" + eventId;
@@ -214,68 +274,66 @@ async function loadEvents() {
         <div class="event-item-meta">${eventId} · ${date}</div>
       </div>
       <div class="event-item-right">
-  <button class="event-select-btn" onclick="selectEvent('${eventId}', '${eventData.eventName}', '${guestLink}')">Select</button>
-  <button class="event-delete-btn" onclick="deleteEvent('${eventId}')">Delete</button>
-</div>
+        <button class="event-select-btn" onclick="selectEvent('${eventId}', '${eventData.eventName}', '${guestLink}')">Select</button>
+        <button class="event-delete-btn" onclick="deleteEvent('${eventId}')">Delete</button>
+      </div>
     `;
     eventsList.appendChild(div);
   });
 }
-window.selectEvent = function(eventId, eventName, guestLink) {
+
+window.selectEvent = function (eventId, eventName, guestLink) {
   currentEventId = eventId;
-  
+
   document.getElementById("sharelink").value = guestLink;
-  document.getElementById("eventid").textContent = 'Active: ' + eventName + ' (' + eventId + ')';
+  document.getElementById("eventid").textContent =
+    "Active: " + eventName + " (" + eventId + ")";
 
-  document.querySelectorAll('.event-item').forEach(function(item) {
-    item.classList.remove('active');
+  document.querySelectorAll(".event-item").forEach(function (item) {
+    item.classList.remove("active");
   });
-  document.getElementById('event-' + eventId).classList.add('active');
+  document.getElementById("event-" + eventId).classList.add("active");
 
-  console.log('Selected event:', eventId);
-
-  // load photos for this event
+  console.log("Selected event:", eventId);
   loadEventPhotos(eventId);
-}
+};
 
-
-window.deleteEvent = async function(eventId) {
-  const confirm = window.confirm('Delete this event? This cannot be undone.');
+window.deleteEvent = async function (eventId) {
+  const confirm = window.confirm("Delete this event? This cannot be undone.");
   if (!confirm) return;
 
-  await remove(ref(db, 'events/' + eventId));
-  
-  // remove from UI
-  const item = document.getElementById('event-' + eventId);
+  await remove(ref(db, "events/" + eventId));
+
+  const item = document.getElementById("event-" + eventId);
   if (item) item.remove();
 
-  // if deleted event was the active one, reset
   if (currentEventId === eventId) {
     currentEventId = null;
-    document.getElementById('sharelink').value = '';
-    document.getElementById('eventid').textContent = 'No event created';
+    document.getElementById("sharelink").value = "";
+    document.getElementById("eventid").textContent = "No event created";
   }
 
-  console.log('Event deleted:', eventId);
-}
+  console.log("Event deleted:", eventId);
+};
 
 async function loadEventPhotos(eventId) {
-  const photoGrid = document.getElementById('photogrid');
-  photoGrid.innerHTML = '<p>Loading photos...</p>';
+  const photoGrid = document.getElementById("photogrid");
+  photoGrid.innerHTML = "<p>Loading photos...</p>";
 
-  const snapshot = await get(ref(db, 'events/' + eventId + '/photos'));
+  const snapshot = await get(ref(db, "events/" + eventId + "/photos"));
 
   if (!snapshot.exists()) {
-    photoGrid.innerHTML = '<p id="emptymsg">No photos uploaded yet.</p>';
+    photoGrid.innerHTML =
+      '<p id="emptymsg" style="font-size:13px; color:#aaa;">No photos uploaded yet.</p>';
     return;
   }
 
-  photoGrid.innerHTML = '';
+  photoGrid.innerHTML = "";
 
   const photosObj = snapshot.val();
-  Object.values(photosObj).forEach(function(photo) {
-    const div = document.createElement('div');
-    div.className = 'photoitem';
+  Object.values(photosObj).forEach(function (photo) {
+    const div = document.createElement("div");
+    div.className = "photoitem";
     div.innerHTML = `<img src="${photo.src}" alt="${photo.name}" />`;
     photoGrid.appendChild(div);
   });

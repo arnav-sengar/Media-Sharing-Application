@@ -157,6 +157,21 @@ function showResults(matches) {
 
   count.textContent = matches.length + " photo(s) found with you in them!";
 
+  const downloadAllBtn = document.createElement("button");
+  downloadAllBtn.textContent = "Download All";
+  downloadAllBtn.className = "btn btn-primary download-all-btn";
+  downloadAllBtn.onclick = async function () {
+    downloadAllBtn.textContent = "Downloading...";
+    downloadAllBtn.disabled = true;
+    for (const src of matches) {
+      await downloadPhoto(src);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    downloadAllBtn.textContent = "Download All";
+    downloadAllBtn.disabled = false;
+  };
+  grid.parentElement.insertBefore(downloadAllBtn, grid);
+
   matches.forEach(function (src) {
     const div = document.createElement("div");
     div.className = "result-item";
@@ -177,13 +192,17 @@ function showResults(matches) {
 // reset everything to initial
 window.rescan = function () {
   document.getElementById("results-screen").style.display = "none";
-  document.getElementById("scan-screen").style.display = "block";
+  document.getElementById("scan-screen").style.display = "flex";
   scanBtn.disabled = false;
   scanStatus.textContent = "Camera ready. Click Scan my face.";
-  
+
   // clear previous results
   document.getElementById("results-grid").innerHTML = "";
-  document.getElementById("results-count").textContent = "Looking through the event photos...";
+  document.getElementById("results-count").textContent =
+    "Looking through the event photos...";
+  const existingBtn = document.querySelector(".download-all-btn");
+  if (existingBtn) existingBtn.remove();
+
 };
 
 window.submitEventLink = function () {
