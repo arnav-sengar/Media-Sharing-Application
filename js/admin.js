@@ -290,7 +290,7 @@ async function loadEvents() {
   myEvents.forEach(function ([eventId, eventData]) {
     const date = new Date(eventData.createdAt).toLocaleDateString();
     const guestLink =
-      window.location.origin + "/PhotoLelo/guest.html?event=" + eventId;
+      window.location.origin + "/guest.html?event=" + eventId;
 
     const div = document.createElement("div");
     div.className = "event-item";
