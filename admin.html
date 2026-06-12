@@ -1,151 +1,215 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhotoLelo-Admin</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PhotoLelo-Admin</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-</head>
-
-<body>
-  <!-- lock screen ka format ...first step yahi se hoga -->
-  <nav class="navbar">
-    <a href="index.html" class="logo" style="text-decoration: none">PhotoLelo</a>
-    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-      🌙
-    </button>
-  </nav>
-  <div id="lockscreen" class="lockscreen">
-    <div class="lockcard">
-      <a href="index.html" class="back-btn">← Back</a>
-      <!-- tabs -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchTab('login')">
-          Login
-        </button>
-        <button class="auth-tab" onclick="switchTab('signup')">
-          Sign Up
-        </button>
-      </div>
-
-      <!-- login form -->
-      <div id="login-form">
-        <h2>Welcome back</h2>
-        <p>Login to manage your events</p>
-        <input type="email" id="login-email" placeholder="Email" />
-        <div class="input-wrapper">
-          <input type="password" id="login-password" placeholder="Password" />
-          <span onclick="togglePassword('login-password')">👁</span>
-        </div>
-        <p id="login-error" class="error-msg">Invalid email or password.</p>
-        <button onclick="loginPhotographer()">Login</button>
-      </div>
-
-      <!-- signup form -->
-      <div id="signup-form" class="hidden">
-        <h2>Create account</h2>
-        <p>Sign up as a photographer</p>
-        <input type="email" id="signup-email" placeholder="Email" />
-        <div class="input-wrapper">
-          <input type="password" id="signup-password" placeholder="Password (min 6 chars)" />
-          <span onclick="togglePassword('signup-password')">👁</span>
-        </div>
-        <p id="signup-error" class="error-msg">Something went wrong.</p>
-        <button onclick="signupPhotographer()">Create Account</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- admin panel...tabhi khulega jab access code ke through unlock ho jaega -->
-  <div id="adminpanel" class="hidden">
+  <body>
     <nav class="navbar">
-      <a href="index.html" class="logo" style="text-decoration: none;">PhotoLelo</a>
-      <span class="nav-badge">Admin</span>
-      <span id="user-email" style="font-size:13px; color:#888; margin-left:8px;"></span>
-      <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-        <button onclick="logout()">Logout</button>
+      <a href="index.html" class="logo" style="text-decoration: none"
+        >PhotoLelo</a
+      >
+      <div
+        style="margin-left: auto; display: flex; align-items: center; gap: 12px"
+      >
+        <button
+          class="theme-toggle"
+          onclick="toggleTheme()"
+          title="Toggle theme"
+        >
+          🌙
+        </button>
+        <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
     </nav>
 
-    <div class="admin-content">
-      <!-- event create karne ka section -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🗂️</div>
-          <h2>Create Event</h2>
-        </div>
-        <p>Create a new event and share the guest link with attendees.</p>
-        <input type="text" id="eventname" placeholder="Event Name (e.g. College Fest)" />
-        <p id="eventname-error" class="error-msg">
-          Please enter an event name.
-        </p>
-        <button onclick="createPhotoEvent()">Create Event</button>
-        <p id="eventid" style="font-size: 13px; color: #888; margin-top: 8px">
-          No event created yet
-        </p>
-        <div class="sharebox" style="margin-top: 12px">
-          <input type="text" id="sharelink" readonly placeholder="Guest link will appear here" />
-          <button onclick="copylink()">Copy</button>
-          <span id="copy-toast" class="copy-toast">Link copied!</span>
-        </div>
-      </div>
+    <div id="nav-menu" class="nav-menu hidden">
+      <a href="index.html">Home</a>
+      <a href="guest.html">Find My Photos</a>
+      <a href="mailto:your@email.com">Contact Us</a>
+    </div>
 
-      <!-- past events ka section -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📋</div>
-          <h2>Your Events</h2>
+    <!-- lock screen -->
+    <div id="lockscreen" class="lockscreen">
+      <div class="lockcard">
+        <a href="index.html" class="back-btn">← Back</a>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchTab('login')">
+            Login
+          </button>
+          <button class="auth-tab" onclick="switchTab('signup')">
+            Sign Up
+          </button>
         </div>
-        <p>Click on an event to select it and upload photos to it.</p>
-        <div id="events-list">
-          <p id="events-empty" style="font-size: 13px; color: #aaa">
-            No events yet.
-          </p>
-        </div>
-      </div>
 
-      <!-- the section jisme poora data UPLOAD hoga -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📸</div>
-          <h2>Upload Photos</h2>
+        <div id="login-form">
+          <h2>Welcome back</h2>
+          <p>Login to manage your events</p>
+          <input type="email" id="login-email" placeholder="Email" />
+          <div class="input-wrapper">
+            <input type="password" id="login-password" placeholder="Password" />
+            <span onclick="togglePassword('login-password')">👁</span>
+          </div>
+          <p id="login-error" class="error-msg">Invalid email or password.</p>
+          <button onclick="loginPhotographer()">Login</button>
         </div>
-        <p>
-          Upload all your pictures here. Each face will be indexed
-          automatically.
-        </p>
-        <div class="dropzone" id="dropzone">
-          <div class="dropzone-icon">☁️</div>
-          <p>Drag & Drop photos here</p>
-          <p>
-            Or
-            <span onclick="document.getElementById('fileinput').click()">browse files</span>
-          </p>
-          <input type="file" id="fileinput" accept="image/*" multiple />
-        </div>
-      </div>
 
-      <!-- jo bhi upload kiya uska section -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🖼️</div>
-          <h2>Uploaded Photos</h2>
-        </div>
-        <div id="photogrid" class="photogrid">
-          <p id="emptymsg" style="font-size: 13px; color: #aaa">
-            No photos uploaded yet.
-          </p>
+        <div id="signup-form" class="hidden">
+          <h2>Create account</h2>
+          <p>Sign up as a photographer</p>
+          <input type="email" id="signup-email" placeholder="Email" />
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="signup-password"
+              placeholder="Password (min 6 chars)"
+            />
+            <span onclick="togglePassword('signup-password')">👁</span>
+          </div>
+          <p id="signup-error" class="error-msg">Something went wrong.</p>
+          <button onclick="signupPhotographer()">Create Account</button>
         </div>
       </div>
     </div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-  <script type="module" src="js/admin.js"></script>
-  <script src="js/theme.js"></script>
-</body>
 
+    <!-- admin panel -->
+    <div id="adminpanel" class="hidden">
+      <nav class="navbar">
+        <a href="index.html" class="logo" style="text-decoration: none"
+          >PhotoLelo</a
+        >
+        <span class="nav-badge">Admin</span>
+        <span
+          id="user-email"
+          style="font-size: 13px; color: #888; margin-left: 8px"
+        ></span>
+        <div
+          style="
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          "
+        >
+          <button
+            class="theme-toggle"
+            onclick="toggleTheme()"
+            title="Toggle theme"
+          >
+            🌙
+          </button>
+          <button onclick="logout()">Logout</button>
+        </div>
+      </nav>
+
+      <div class="admin-content">
+        <!-- create event -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🗂️</div>
+            <h2>Create Event</h2>
+          </div>
+          <p>Create a new event and share the guest link with attendees.</p>
+          <input
+            type="text"
+            id="eventname"
+            placeholder="Event Name (e.g. College Fest)"
+          />
+          <p id="eventname-error" class="error-msg">
+            Please enter an event name.
+          </p>
+          <button onclick="createPhotoEvent()">Create Event</button>
+          <p id="eventid" style="font-size: 13px; color: #888; margin-top: 8px">
+            No event created yet
+          </p>
+          <p
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              color: var(--text-muted);
+              margin-bottom: 6px;
+              margin-top: 12px;
+            "
+          >
+            Guest Link
+          </p>
+          <div class="sharebox">
+            <input
+              type="text"
+              id="sharelink"
+              readonly
+              placeholder="Guest link will appear here"
+            />
+            <button onclick="copylink()">Copy</button>
+            <span id="copy-toast" class="copy-toast">Link copied!</span>
+          </div>
+        </div>
+
+        <!-- your events -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">📋</div>
+            <h2>Your Events</h2>
+          </div>
+          <p>Click on an event to select it and upload photos to it.</p>
+          <div id="events-list">
+            <p id="events-empty" style="font-size: 13px; color: #aaa">
+              No events yet.
+            </p>
+          </div>
+        </div>
+
+        <!-- upload photos -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">📸</div>
+            <h2>Upload Photos</h2>
+          </div>
+          <p>
+            Upload all your pictures here. Each face will be indexed
+            automatically.
+          </p>
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-icon">☁️</div>
+            <p>Drag & Drop photos here</p>
+            <p>
+              Or
+              <span onclick="document.getElementById('fileinput').click()"
+                >browse files</span
+              >
+            </p>
+            <input type="file" id="fileinput" accept="image/*" multiple />
+          </div>
+        </div>
+
+        <!-- uploaded photos -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🖼️</div>
+            <h2>Uploaded Photos</h2>
+          </div>
+          <div id="photogrid" class="photogrid">
+            <p id="emptymsg" style="font-size: 13px; color: #aaa">
+              No photos uploaded yet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script type="module" src="js/admin.js"></script>
+    <script src="js/theme.js"></script>
+  </body>
 </html>

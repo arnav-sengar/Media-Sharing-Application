@@ -2,7 +2,7 @@
 
 > Grab your pictures, the smart way.
 
-PhotoLelo is an AI-powered photo retrieval system built for events. Photographers upload all event photos once — attendees scan their face and instantly get every photo they appear in. No manual sorting, no WhatsApp floods, no hassle.
+PhotoLelo is a powerful photo retrieval system built for events. Photographers upload all event photos once — attendees scan their face and instantly get every photo they appear in. No manual sorting, no WhatsApp floods, no hassle.
 
 ---
 
@@ -86,7 +86,7 @@ face-api.js runs entirely in the browser — no face data is ever sent to a serv
 1. Clone the repository
 
 ```bash
-git clone https://github.com/arnav-sengar/PhotoLelo.git
+git clone https://github.com/arnav-sengar/Media-Sharing-Application.git
 cd PhotoLelo
 ```
 

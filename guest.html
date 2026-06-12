@@ -12,13 +12,22 @@
   </head>
   <body>
     <nav class="navbar">
-      <a href="index.html" class="logo" style="text-decoration: none"
-        >PhotoLelo</a
-      >
-      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-        🌙
-      </button>
-    </nav>
+  <a href="index.html" class="logo" style="text-decoration: none;">PhotoLelo</a>
+  <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+<div id="nav-menu" class="nav-menu hidden">
+  <a href="index.html">Home</a>
+  <a href="admin.html">Photographer Login</a>
+  <a href="mailto:your@email.com">Contact Us</a>
+</div>
 
     <!-- EVENT LINK SCREEN -->
     <div id="link-screen" class="guest-container hidden">

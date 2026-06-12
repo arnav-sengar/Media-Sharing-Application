@@ -108,10 +108,20 @@ window.createPhotoEvent = async function () {
   });
 
   currentEventId = eventId;
-  document.getElementById("eventid").textContent = "Event ID: " + eventId;
 
-  const guestLink =
-    window.location.origin + "/PhotoLelo/guest.html?event=" + eventId;
+  // clear photo grid for new event
+  const photoGrid = document.getElementById("photogrid");
+  photoGrid.innerHTML = '<p id="emptymsg" style="font-size:13px; color:#aaa;">No photos uploaded yet.</p>';
+
+  // clear event name input
+  document.getElementById("eventname").value = "";
+
+  // show success message
+  const eventIdEl = document.getElementById("eventid");
+  eventIdEl.textContent = "✓ Event created — " + eventId;
+  eventIdEl.style.color = "#0F6E56";
+
+  const guestLink = window.location.origin + "/PhotoLelo/guest.html?event=" + eventId;
   document.getElementById("sharelink").value = guestLink;
 
   loadEvents();
@@ -183,7 +193,8 @@ function handleFiles(files) {
 }
 
 async function addPhototoGrid(cloudinaryUrl, localSrc, name) {
-  if (emptymessage) emptymessage.remove();
+  const emptyMsg = document.getElementById("emptymsg");
+  if (emptyMsg) emptyMsg.remove();
 
   const div = document.createElement("div");
   div.className = "photoitem";
@@ -223,9 +234,25 @@ async function addPhototoGrid(cloudinaryUrl, localSrc, name) {
 // === COPY LINK ===
 window.copylink = function () {
   const link = document.getElementById("sharelink").value;
-  navigator.clipboard.writeText(link);
-
   const toast = document.getElementById("copy-toast");
+
+  if (!link) {
+    toast.textContent = "Please create or select an event first.";
+    toast.style.color = "#cc0000";
+    toast.style.opacity = "1";
+    setTimeout(function () {
+      toast.style.opacity = "0";
+      setTimeout(function () {
+        toast.textContent = "Link copied!";
+        toast.style.color = "#0F6E56";
+      }, 300);
+    }, 2000);
+    return;
+  }
+
+  navigator.clipboard.writeText(link);
+  toast.textContent = "Link copied!";
+  toast.style.color = "#0F6E56";
   toast.style.opacity = "1";
 
   setTimeout(function () {
