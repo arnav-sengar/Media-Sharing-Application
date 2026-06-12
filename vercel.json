@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/PhotoLelo/guest.html",
+      "destination": "/PhotoLelo/guest.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
