@@ -23,7 +23,7 @@ PhotoLelo automates this entirely:
 
 ## Demo
 
-> 🔗 Live link coming soon
+> 🔗 [https://photo-lelo.vercel.app/](https://photo-lelo.vercel.app/)
 
 ---
 
