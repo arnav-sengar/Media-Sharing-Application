@@ -114,7 +114,7 @@ async function matchPhotos(userDescriptor) {
         Array.isArray(descriptor) ? descriptor : Object.values(descriptor),
       );
       const dist = faceapi.euclideanDistance(userDescriptor, float32);
-      if (dist < 0.5) {
+      if (dist < 0.8) {
         matched = true;
       }
     });
