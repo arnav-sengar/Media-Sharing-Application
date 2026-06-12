@@ -121,7 +121,7 @@ window.createPhotoEvent = async function () {
   eventIdEl.textContent = "✓ Event created — " + eventId;
   eventIdEl.style.color = "#0F6E56";
 
-  const guestLink = window.location.origin + "/PhotoLelo/guest.html?event=" + eventId;
+  const guestLink = window.location.origin + "/guest.html?event=" + eventId;
   document.getElementById("sharelink").value = guestLink;
 
   loadEvents();
